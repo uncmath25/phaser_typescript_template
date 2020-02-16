@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "sourceMap": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "plugins": [
       {
         "name": "typescript-tslint-plugin",
@@ -11,6 +12,6 @@
     ]
   },
   "include": [
-    "src/ts/*"
+    "src/**/*.ts"
   ]
 }
