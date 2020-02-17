@@ -8,7 +8,7 @@ BUNDLE_DIR=dist
 
 clean:
 	@echo "*** Purging repo of unnecessary artifacts... ***"
-	sudo rm -rf $(BUNDLE_DIR)
+	rm -rf $(BUNDLE_DIR)
 
 build: clean
 	@echo "*** Building npm docker image for phaser game... ***"
@@ -20,6 +20,7 @@ run: build
 	docker run \
 		--rm \
 		-p $(SERVER_PORT):$(SERVER_PORT) \
+		-v "$$(pwd)/assets/:$(REMOTE_WORKING_DIR)/assets/" \
 		-v "$$(pwd)/src/:$(REMOTE_WORKING_DIR)/src/" \
 		$(IMAGE_NAME) \
 		npm start

@@ -11,9 +11,9 @@ export class MainScene extends Phaser.Scene {
   player: Phaser.Physics.Arcade.Sprite;
   bombs: Phaser.Physics.Arcade.Group;
 
-  constructor(game: Phaser.Game) {
-    super(game);
-  }
+  isGameOver = false;
+  score: number = 0;
+  scoreText: Phaser.GameObjects.Text;
 
   preload() {
     for (let imageKey of Object.keys(imageSpecs)) {
@@ -29,28 +29,51 @@ export class MainScene extends Phaser.Scene {
     this.player = groupBuilder.buildPlayer();
     this.bombs = groupBuilder.buildBombs();
 
-    this._configureCollisions(this);
-    this._configureKeyboard(this);
+    this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
-    // scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    this._configureCollisions();
+    this._configureKeyboard();
   }
 
-  _configureCollisions(scene: Phaser.Scene) {
-    let physicsFactory: Phaser.Physics.Arcade.Factory = scene.physics.add;
-    physicsFactory.collider(this.stars, this.platforms);
-    physicsFactory.collider(this.player, this.platforms);
-    physicsFactory.collider(this.bombs, this.platforms);
-    physicsFactory.overlap(this.player, this.stars, this._collectStar, null, this);
-    physicsFactory.collider(this.player, this.bombs, this._hitBomb, null, this);
+  _configureCollisions() {
+    this.physics.add.collider(this.stars, this.platforms);
+    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.bombs, this.platforms);
+    this.physics.add.overlap(this.player, this.stars, this._collectStar, null, this);
+    this.physics.add.collider(this.player, this.bombs, this._hitBomb, null, this);
   }
 
-  _configureKeyboard(scene: Phaser.Scene) {
-    this.cursors = scene.input.keyboard.createCursorKeys();
+  _configureKeyboard() {
+    this.cursors = this.input.keyboard.createCursorKeys();
   }
 
-  _collectStar() {}
+  _collectStar(player: Phaser.Physics.Arcade.Sprite, star: Phaser.Physics.Arcade.Sprite) {
+    star.disableBody(true, true);
 
-  _hitBomb() {}
+    this.score += 10;
+    this.scoreText.setText('Score: ' + this.score);
+
+    if (this.stars.countActive(true) === 0) {
+        this.stars.getChildren().forEach(function(obj: Phaser.Physics.Arcade.Sprite) {
+          obj.enableBody(true, obj.x, 0, true, true);
+        })
+
+        let x: number = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        let bomb: Phaser.Physics.Arcade.Sprite = this.bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.setGravityY(0);
+    }
+  }
+
+  _hitBomb() {
+    this.physics.pause();
+    this.player.setTint(0xff0000);
+    this.player.anims.play('turn');
+    this.isGameOver = true;
+  }
 
   update() {
     if (this.cursors.left.isDown) {

@@ -38,10 +38,9 @@ export class GroupBuilder {
       repeat: 11,
       setXY: { x: 12, y: 0, stepX: 70 }
     });
-    const physicsWorld: Phaser.Physics.Arcade.World = this.physicsFactory.world;
-    stars.children.iterate(function (child: Phaser.GameObjects.GameObject) {
-        new Phaser.Physics.Arcade.Body(physicsWorld, child).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    });
+    stars.getChildren().forEach(function(obj: Phaser.GameObjects.GameObject) {
+      (obj.body as Phaser.Physics.Arcade.Body).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    })
     return stars;
   }
 
@@ -55,8 +54,6 @@ export class GroupBuilder {
         frameRate: 10,
         repeat: -1
     });
-    console.log(player);
-    console.log(player.anims.animationManager);
     player.anims.animationManager.create({
         key: 'turn',
         frames: [ { key: Images.PLAYER_IMAGE, frame: 4 } ],

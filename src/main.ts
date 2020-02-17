@@ -6,4 +6,5 @@ const simpleConfig: SimpleGameConfig = {
   GRAVITY: 300
 };
 const simpleGame: SimpleGame = new SimpleGame(simpleConfig);
-simpleGame.run();
+
+window.onload = () => { simpleGame.run(); }
