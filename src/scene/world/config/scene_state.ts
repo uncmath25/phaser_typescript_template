@@ -1,4 +1,4 @@
-import { SceneState } from "../../core/config/scene_state";
+import { SceneState } from "../../../core/scene/config/scene_state";
 
 export interface WorldSceneState extends SceneState {
   isGameOver: boolean

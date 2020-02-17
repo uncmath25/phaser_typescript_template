@@ -1,38 +1,31 @@
-import Phaser from "phaser";
-
+import { KeyCode } from "../../../core/config/keycodes";
+import { KeyboardConnector } from "../../../core/plugin/keyboard";
 import { WorldSceneState } from "../config/scene_state";
 import * as Groups from "../config/groups";
 
 export class GroupUpdater {
-  sceneState: WorldSceneState
-  keyboardPlugin: Phaser.Input.Keyboard.KeyboardPlugin
-  groups: Object
+  // private sceneState: WorldSceneState
+  private keyboardConnector: KeyboardConnector
+  private groups: Object
 
-  cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
-
-  constructor(sceneState: WorldSceneState, keyboardPlugin: Phaser.Input.Keyboard.KeyboardPlugin, groups: Object) {
-    this.sceneState = sceneState;
-    this.keyboardPlugin = keyboardPlugin;
+  constructor(_: WorldSceneState, keyboardConnector: KeyboardConnector, groups: Object) {
+    // this.sceneState = sceneState;
+    this.keyboardConnector = keyboardConnector;
     this.groups = groups;
-
-    this.cursorKeys = keyboardPlugin.createCursorKeys();
   }
 
   update() {
-    if (this.cursorKeys.left.isDown) {
+    if (this.keyboardConnector.isKeyDown(KeyCode.LEFT)) {
       this.groups[Groups.PLAYER_GROUP].setVelocityX(-160);
-      this.groups[Groups.PLAYER_GROUP].play('left', true);
     }
-    else if (this.cursorKeys.right.isDown) {
+    else if (this.keyboardConnector.isKeyDown(KeyCode.RIGHT)) {
       this.groups[Groups.PLAYER_GROUP].setVelocityX(160);
-      this.groups[Groups.PLAYER_GROUP].play('right', true);
     }
     else {
       this.groups[Groups.PLAYER_GROUP].setVelocityX(0);
-      this.groups[Groups.PLAYER_GROUP].play('turn');
     }
 
-    if (this.cursorKeys.up.isDown && this.groups[Groups.PLAYER_GROUP].body.touching.down) {
+    if (this.keyboardConnector.isKeyDown(KeyCode.UP) && this.groups[Groups.PLAYER_GROUP].body.touching.down) {
       this.groups[Groups.PLAYER_GROUP].setVelocityY(-330);
     }
   }

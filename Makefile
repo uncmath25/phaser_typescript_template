@@ -1,10 +1,12 @@
 .PHONY: clean build run bundle
 
-PROJECT_DIR="project"
+PROJECT_DIR=project
 IMAGE_NAME := uncmath25/phaser-example
 REMOTE_WORKING_DIR=/usr/src/app
 SERVER_PORT=8000
 BUNDLE_DIR=dist
+
+default: run
 
 clean:
 	@echo "*** Purging repo of unnecessary artifacts... ***"
@@ -28,7 +30,6 @@ run: build
 bundle: build
 	@echo "*** Bundling static js game deployment package ***"
 	mkdir $(BUNDLE_DIR)
-	# chown -R "$(USER):$(USER)" $(BUNDLE_DIR)
 	docker run \
 		--rm \
 		-v "$$(pwd)/$(BUNDLE_DIR)/:$(REMOTE_WORKING_DIR)/$(BUNDLE_DIR)/" \

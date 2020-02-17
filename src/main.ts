@@ -1,10 +1,11 @@
-import {SimpleGameConfig, SimpleGame} from "./game"
+import { GameConfig } from "./core/game";
+import { Game } from "./game"
 
-const simpleConfig: SimpleGameConfig = {
+const gameConfig: GameConfig = {
   WIDTH: 800,
   HEIGHT: 600,
   GRAVITY: 300
 };
-const simpleGame: SimpleGame = new SimpleGame(simpleConfig);
+const game: Game = new Game(gameConfig);
 
-window.onload = () => { simpleGame.run(); }
+window.onload = () => { game.run(); }

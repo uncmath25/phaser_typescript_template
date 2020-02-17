@@ -1,4 +1,4 @@
-import { Scene } from "../core/main";
+import { Scene } from "../../core/scene/main";
 import { WorldSceneState } from "./config/scene_state";
 import { WorldSceneController } from "./controller/main";
 

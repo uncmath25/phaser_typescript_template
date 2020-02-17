@@ -4,7 +4,7 @@ import { SceneState } from "./config/scene_state";
 import { SceneController } from "./controller/main";
 
 export abstract class Scene<SS extends SceneState> extends Phaser.Scene {
-  abstract sceneController: SceneController<SS>;
+  protected abstract sceneController: SceneController<SS>;
 
   preload() { this.sceneController.loadAssets(); }
 

@@ -1,21 +1,18 @@
-import Phaser from "phaser";
-
+import { GameObjectFactory, Sprite } from "../../../core/factory/game_object";
+import { PhysicsManager } from "../../../core/plugin/physics_manager";
 import { WorldSceneState } from "../config/scene_state";
 import * as Groups from "../config/groups";
 import * as Images from "../config/images";
 
 export class GroupInitializer {
-  sceneState: WorldSceneState
-  physicsPlugin: Phaser.Physics.Arcade.ArcadePhysics;
-  gameObjectFactory: Phaser.GameObjects.GameObjectFactory;
-  physicsFactory: Phaser.Physics.Arcade.Factory;
+  private sceneState: WorldSceneState
+  private physicsManager: PhysicsManager;
+  private gameObjectFactory: GameObjectFactory;
 
-  constructor(sceneState: WorldSceneState, physicsPlugin: Phaser.Physics.Arcade.ArcadePhysics,
-              gameObjectFactory: Phaser.GameObjects.GameObjectFactory, physicsFactory: Phaser.Physics.Arcade.Factory) {
+  constructor(sceneState: WorldSceneState, physicsManager: PhysicsManager, gameObjectFactory: GameObjectFactory) {
     this.sceneState = sceneState;
-    this.physicsPlugin = physicsPlugin;
+    this.physicsManager = physicsManager;
     this.gameObjectFactory = gameObjectFactory;
-    this.physicsFactory = physicsFactory;
   }
 
   init() {
@@ -24,7 +21,7 @@ export class GroupInitializer {
     return groups;
   }
 
-  initGroups() {
+  private initGroups() {
     let groups = {};
     groups[Groups.BACKGROUND_GROUP] = this.initBackground();
     groups[Groups.PLATFORM_GROUP] = this.initPlatforms();
@@ -35,92 +32,76 @@ export class GroupInitializer {
     return groups;
   }
 
-  initBackground() {
-    this.gameObjectFactory.image(400, 300, Images.BACKGROUND_IMAGE);
+  private initBackground() {
+    this.gameObjectFactory.buildStaticImage(400, 300, Images.BACKGROUND_IMAGE);
   }
 
-  initPlatforms() {
-    let platforms: Phaser.Physics.Arcade.StaticGroup = this.physicsFactory.staticGroup();
-    platforms.create(400, 568, Images.PLATFORM_IMAGE).setScale(2).refreshBody();
-    platforms.create(600, 400, Images.PLATFORM_IMAGE);
-    platforms.create(50, 250, Images.PLATFORM_IMAGE);
-    platforms.create(750, 220, Images.PLATFORM_IMAGE);
-    return platforms;
+  private initPlatforms() {
+    return this.gameObjectFactory.buildStaticGroup([
+      {x:400, y:568, imageKey:Images.PLATFORM_IMAGE, scaleRatio:2},
+      {x:600, y:400, imageKey:Images.PLATFORM_IMAGE},
+      {x:50, y:250, imageKey:Images.PLATFORM_IMAGE},
+      {x:750, y:220, imageKey:Images.PLATFORM_IMAGE}
+    ]);
   }
 
-  initStars() {
-    let stars: Phaser.Physics.Arcade.Group = this.physicsFactory.group({
-      key: Images.STAR_IMAGE,
-      repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 }
+  private initStars() {
+    return this.gameObjectFactory.buildDynamicCluster({
+      imageKey: Images.STAR_IMAGE,
+      count: 11,
+      startX: 12,
+      startY: 0,
+      stepX: 70,
+      stepY: 0,
+      bounce: 0.4
     });
-    stars.getChildren().forEach( obj => { (obj.body as Phaser.Physics.Arcade.Body).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8)); } );
-    return stars;
   }
 
-  initPlayer() {
-    let player: Phaser.Physics.Arcade.Sprite = this.physicsFactory.sprite(100, 450, Images.PLAYER_IMAGE);
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
-    player.anims.animationManager.create({
-        key: 'left',
-        frames: player.anims.animationManager.generateFrameNumbers(Images.PLAYER_IMAGE, { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1
+  private initPlayer() {
+    return this.gameObjectFactory.buildDynamicSprite({
+      x: 100,
+      y: 450,
+      imageKey: Images.PLAYER_IMAGE,
+      bounce: 0.2,
+      constrainToWorld: true
     });
-    player.anims.animationManager.create({
-        key: 'turn',
-        frames: [ { key: Images.PLAYER_IMAGE, frame: 4 } ],
-        frameRate: 20
-    });
-    player.anims.animationManager.create({
-        key: 'right',
-        frames: player.anims.animationManager.generateFrameNumbers(Images.PLAYER_IMAGE, { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1
-    });
-    return player;
   }
 
-  initBombs() {
-    return this.physicsFactory.group();
+  private initBombs() {
+    return this.gameObjectFactory.buildDynamicGroup([]);
   }
 
-  initScoreboard() {
-    return this.gameObjectFactory.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
+  private initScoreboard() {
+    return this.gameObjectFactory.buildStaticText(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
   }
 
-  configureCollisions(groups: Object) {
-    this.physicsFactory.collider(groups[Groups.STAR_GROUP], groups[Groups.PLATFORM_GROUP]);
-    this.physicsFactory.collider(groups[Groups.PLAYER_GROUP], groups[Groups.PLATFORM_GROUP]);
-    this.physicsFactory.collider(groups[Groups.BOMB_GROUP], groups[Groups.PLATFORM_GROUP]);
-    this.physicsFactory.overlap(groups[Groups.PLAYER_GROUP], groups[Groups.STAR_GROUP], this.buildCollectStarFcn(groups), null, this);
-    this.physicsFactory.collider(groups[Groups.PLAYER_GROUP], groups[Groups.BOMB_GROUP], this.buildHitBomb(groups), null, this);
+  private configureCollisions(groups: Object) {
+    this.physicsManager.handleCollision(groups, Groups.STAR_GROUP, Groups.PLATFORM_GROUP);
+    this.physicsManager.handleCollision(groups, Groups.PLAYER_GROUP, Groups.PLATFORM_GROUP);
+    this.physicsManager.handleCollision(groups, Groups.BOMB_GROUP, Groups.PLATFORM_GROUP);
+    this.physicsManager.handleCollision(groups, Groups.PLAYER_GROUP, Groups.STAR_GROUP, this.buildCollectStarFcn(groups), this);
+    this.physicsManager.handleCollision(groups, Groups.PLAYER_GROUP, Groups.BOMB_GROUP, this.buildHitBomb(groups), this);
   }
 
-  buildCollectStarFcn(groups: Object) {
-    return (player: Phaser.Physics.Arcade.Sprite, star: Phaser.Physics.Arcade.Sprite) => {
+  private buildCollectStarFcn(groups: Object) {
+    return (player: Sprite, star: Sprite) => {
       star.disableBody(true, true);
-
       this.sceneState.score += 10;
       groups[Groups.SCOREBOARD_GROUP].setText('Score: ' + this.sceneState.score);
-
       if (groups[Groups.STAR_GROUP].countActive(true) === 0) {
-          groups[Groups.STAR_GROUP].getChildren().forEach( (obj: Phaser.Physics.Arcade.Sprite) => { obj.enableBody(true, obj.x, 0, true, true); })
-
-          let x: number = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-          let bomb: Phaser.Physics.Arcade.Sprite = groups[Groups.BOMB_GROUP].create(x, 16, 'bomb');
+          groups[Groups.STAR_GROUP].getChildren().forEach( (obj: Sprite) => { obj.enableBody(true, obj.x, 0, true, true); })
+          let x: number = (player.x < 400) ? 600 : 200;
+          let bomb: Sprite = groups[Groups.BOMB_GROUP].create(x, 16, 'bomb');
           bomb.setBounce(1);
           bomb.setCollideWorldBounds(true);
-          bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+          bomb.setVelocity(100, 20);
           bomb.setGravityY(0);
       }
     }
   }
-  buildHitBomb(groups: Object) {
-    return (player: Phaser.Physics.Arcade.Sprite, star: Phaser.Physics.Arcade.Sprite) => {
-      this.physicsPlugin.pause();
+  private buildHitBomb(groups: Object) {
+    return (_: Sprite, __: Sprite) => {
+      this.physicsManager.pause();
       groups[Groups.PLAYER_GROUP].setTint(0xff0000);
       groups[Groups.PLAYER_GROUP].anims.play('turn');
       this.sceneState.isGameOver = true;
