@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-import {MainScene} from "./scenes/main_scene/scene"
+import {WorldScene} from "./scene/world/main"
 
 export interface SimpleGameConfig {
   WIDTH: number,
@@ -15,7 +15,7 @@ export class SimpleGame {
 
   constructor(simpleConfig: SimpleGameConfig) {
     this.game = new Phaser.Game(this._buildGameConfig(simpleConfig));
-    this.game.scene.add(this.MAIN_SCENE, new MainScene(this.game));
+    this.game.scene.add(this.MAIN_SCENE, new WorldScene(this.game));
   }
 
   _buildGameConfig(simpleConfig: SimpleGameConfig) {

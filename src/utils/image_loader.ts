@@ -23,13 +23,13 @@ export interface ImageSpec {
   options?: Object
 }
 
-export function importImage(imageSpec: ImageSpec, scene: Phaser.Scene) {
-  scene.load.setBaseURL(BASE_URL);
+export function importImage(imageSpec: ImageSpec, loaderPlugin: Phaser.Loader.LoaderPlugin) {
+  loaderPlugin.setBaseURL(BASE_URL);
   if (imageSpec.isSpriteMap) {
     let frameOptions = { frameWidth: imageSpec.options['frameWidth'], frameHeight: imageSpec.options['frameHeight'] };
-    scene.load.spritesheet(imageSpec.key, `${IMAGE_ROOT_DIR}/sprite_sheet/${imageSpec.imageType}/${imageSpec.key}.png`, frameOptions);
+    loaderPlugin.spritesheet(imageSpec.key, `${IMAGE_ROOT_DIR}/sprite_sheet/${imageSpec.imageType}/${imageSpec.key}.png`, frameOptions);
   } else {
-    scene.load.image(imageSpec.key, `${IMAGE_ROOT_DIR}/normal/${imageSpec.imageType}/${imageSpec.key}.png`);
+    loaderPlugin.image(imageSpec.key, `${IMAGE_ROOT_DIR}/normal/${imageSpec.imageType}/${imageSpec.key}.png`);
   }
 
 }

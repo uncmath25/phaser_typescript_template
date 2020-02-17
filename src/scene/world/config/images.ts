@@ -1,4 +1,4 @@
-import {ImageType} from "../../utils/image_loader";
+import {ImageType} from "../../../utils/image_loader";
 
 export const BACKGROUND_IMAGE: string = "background";
 export const PLATFORM_IMAGE: string = "platform";
