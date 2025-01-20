@@ -14,7 +14,7 @@ function buildPhaserGameConfig(simpleConfig: GameConfig) {
     physics: {
       default: 'arcade',
       arcade: {
-        gravity: { y: simpleConfig.GRAVITY },
+        gravity: { x: 0, y: simpleConfig.GRAVITY },
         debug: false
       }
     }

@@ -26,7 +26,7 @@ module.exports = {
   },
 
   plugins: [
-    new CopyWebpackPlugin([
+    new CopyWebpackPlugin({patterns: [
       {
         from: path.resolve(__dirname, 'src/index.html'),
         to: path.resolve(__dirname, 'dist/index.html')
@@ -35,7 +35,7 @@ module.exports = {
         from: path.resolve(__dirname, 'assets'),
         to: path.resolve(__dirname, 'dist/assets')
       }
-    ]),
+    ]}),
     new webpack.DefinePlugin({
       'typeof CANVAS_RENDERER': JSON.stringify(true),
       'typeof WEBGL_RENDERER': JSON.stringify(true)
@@ -45,8 +45,7 @@ module.exports = {
   devtool: 'source-map',
 
   devServer: {
-    contentBase: path.resolve(__dirname, 'dist'),
-    https: false
+    static: path.resolve(__dirname, 'dist')
   },
 
   output: {
